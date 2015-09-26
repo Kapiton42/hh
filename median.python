@@ -1,0 +1,96 @@
+#!/usr/bin/env python3
+# coding=utf-8
+from statistics import median
+import argparse
+import random
+import time
+
+
+def getMedian(arr1, arr2, left, right):
+    global n
+    if right < left:
+        getMedian(arr2, arr1, 0, n - 1)
+    i = int((right + left) / 2)
+    j = n - i - 1
+
+    if (arr1[i] >= arr2[j]) & ((j == n - 1) | (arr1[i] <= arr2[j + 1])):
+        if (i == 0) | (arr2[j] > arr1[i - 1]):
+            return (arr1[i] + arr2[j]) / 2
+        else:
+            return (arr1[i] + arr1[i - 1]) / 2
+    else:
+        if (arr1[i] > arr2[j]) & (j != n - 1) & (arr1[i] > arr2[j + 1]):
+            return getMedian(arr1, arr2, left, i - 1)
+        else:
+            return getMedian(arr1, arr2, i + 1, right)
+
+
+def genAr(n, arr):
+    for i in range(0, n):
+        arr.append(random.randint(1, 100))
+
+parser = argparse.ArgumentParser(description='Process some integers.')
+parser.add_argument('-t', dest='type', default="keyboard",
+                    help='Type of input(default from keyboard )'
+                    '.Possible values: file, keyboard, random')
+
+args = parser.parse_args()
+
+arr1 = []
+arr2 = []
+try:
+    if args.type == "keyboard":
+        arr1 = input("Enter first array: ").split(" ")
+        arr2 = input("Enter second array: ").split(" ")
+        for i in range(0, len(arr2)):
+            arr1[i] = int(arr1[i])
+            arr2[i] = int(arr2[i])
+    elif args.type == "file":
+        inp = input("Enter file name: ")
+        f = open(inp, 'r')
+        n = int(f.readline())
+        for line in f:
+            line = line.split(" ")
+            if (n - len(arr1)) >= len(line):
+                for i in line:
+                    arr1.append(int(i))
+            elif len(arr1) == n:
+                for i in line:
+                    arr2.append(int(i))
+            else:
+                count = 0
+                for i in range(len(arr1), n):
+                    arr1.append(int(line[i - len(arr1)]))
+                    count += 1
+                for i in range(0, len(line) - count):
+                    arr2.append(int(line[count + i]))
+    elif args.type == "random":
+        temp = int(input("Enter length of arrays: "))
+        genAr(temp, arr1)
+        genAr(temp, arr2)
+        arr1.sort()
+        arr2.sort()
+    else:
+        print("Wrong type of input")
+        exit()
+except ValueError:
+    print("Wrong value")
+    exit()
+
+n = len(arr1)
+if n != len(arr2):
+    print("length of arrays do not equal")
+    exit()
+
+t = time.time()
+answer = median(map(int, arr1 + arr2))
+print("First method: Answer:", answer, "Time:", time.time() - t)
+
+arr1.append(0)
+arr2.append(0)
+t = time.time()
+if(arr1[n - 1] < arr2[0]):
+    answer = (arr2[0] + arr1[n - 1]) / 2
+else:
+    answer = getMedian(arr1, arr2, 0, n - 1)
+print("Second method: Answer:", answer, "Time:", time.time() - t)

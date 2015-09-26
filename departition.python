@@ -1,0 +1,66 @@
+#!/usr/bin/env python3
+# coding=utf-8
+import time
+
+
+def getDepartition1(n, k, m):
+    count = 0
+    global store1
+    try:
+        count = store1[str(n)+":"+str(k)+":"+str(m)]
+    except KeyError:
+        temp = n - k + 2
+        if temp > m:
+            temp = m
+
+        if (k == 1) & (n < temp):
+            return 1
+        if k > n:
+            return 0
+        if (k * (temp - 1)) < n:
+            return 0
+        if n == k:
+            return 1
+
+        for i in reversed(range(1, temp)):
+            count += getDepartition1(n - i, k - 1, i + 1)
+        store1[str(n)+":"+str(k)+":"+str(m)] = count
+    return count
+
+
+def getDepartition2(n, k):
+    global store2
+    try:
+        temp = store2[str(n) + ":" + str(k)]
+    except KeyError:
+        if n == k:
+            return 1
+        if k == 1:
+            return 1
+        if k > n:
+            return 0
+
+        temp = (getDepartition2(n-1, k-1) + getDepartition2(n - k, k))
+        store2[str(n) + ":" + str(k)] = temp
+    return temp
+
+store1 = {}
+store2 = {}
+try:
+    n = int(input("Enter n: "))
+    k = int(input("Enter k: "))
+except ValueError:
+    print("Wrong value")
+    exit()
+
+if (n < 1) | (k < 1):
+    print("Wrong value")
+    exit()
+
+t = time.time()
+answer = getDepartition1(n, k, n + 1)
+print("First method: Answer:", answer, "Time:", time.time() - t)
+
+t = time.time()
+answer = getDepartition2(n, k)
+print("Second method: Answer:", answer, "Time:", time.time() - t)
